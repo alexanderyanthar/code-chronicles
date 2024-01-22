@@ -3,7 +3,7 @@ const paths = {
     return "/";
   },
   postShow(postSlug: string) {
-    return `/${postSlug}`;
+    return `/posts/${postSlug}`;
   },
 };
 

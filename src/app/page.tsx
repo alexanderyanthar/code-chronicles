@@ -4,14 +4,31 @@ import Image from "next/image";
 import DOMPurify from "isomorphic-dompurify";
 import HeroPost from "@/components/hero-post";
 import { parseISO, format } from "date-fns";
+import Container from "@/components/container";
 
 export default async function Home() {
   const result: SimplifiedPost[] | undefined = await fetchLatestPosts();
+  const heroPostData = result?.[0];
+
+  /*
+  TODO:
+    1. Organize the rest of data flow
+    2. DONE---Split hero post data away from rest of posts (first item in array)
+    3. split up componenets and functions individually for separation of concerns
+      - Date function
+      - Image sizing
+      - author avatar and names
+      - title
+      - excerpt and content
+    4. Pass data as props from parent to children
+      Be mindful of data flow!! - Refer to course to get the perfect mid point. - Not applicable yet, but will be soon.
+  */
 
   return (
     <div>
-      <h1>Home Page</h1>
-      <HeroPost />
+      <Container>
+        <HeroPost heroPostData={heroPostData} />
+      </Container>
       <ul>
         {result?.map((post) => (
           <li key={post.title}>

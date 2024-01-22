@@ -1,25 +1,35 @@
 export interface SimplifiedPost {
-  author: {
-    node: {
-      avatar: {
-        url: string;
-      };
-      nickname: string;
-      name: string;
-    };
-  };
+  author: Author;
   content: string;
   date: string;
   excerpt: string;
-  featuredImage: {
-    node: {
-      id: string;
-      altText: string;
-      sourceUrl: string;
-    };
-  };
+  featuredImage: FeaturedImage;
   slug: string;
   title: string;
+}
+
+export interface FeaturedImage {
+  node: {
+    id: string;
+    altText: string;
+    mediaDetails: {
+      sizes: {
+        height: string;
+        width: string;
+      }[];
+    };
+    sourceUrl: string;
+  };
+}
+
+export interface Author {
+  node: {
+    avatar: {
+      url: string;
+    };
+    nickname: string;
+    name: string;
+  };
 }
 
 interface Edge {
@@ -49,6 +59,12 @@ export async function fetchLatestPosts(): Promise<
                     id
                     altText
                     sourceUrl
+                    mediaDetails {
+                      sizes {
+                        height
+                        width
+                      }
+                    }
                   }
                 }
                 author {
