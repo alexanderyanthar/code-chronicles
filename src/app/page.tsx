@@ -1,5 +1,5 @@
-import { fetchLatestPosts } from "@/wordpress/post-query";
-import type { SimplifiedPost } from "@/wordpress/post-query";
+import { fetchCategoryIds, fetchLatestPosts } from "@/wordpress/post-query";
+import type { SimplifiedPost, CategoryIds } from "@/wordpress/post-query";
 import Image from "next/image";
 import DOMPurify from "isomorphic-dompurify";
 import HeroPost from "@/components/hero-post";

@@ -1,3 +1,12 @@
+/*
+  TO DO:
+    1. Fetch all posts within a category
+    2. Figure out the structure of the category posts. Should it be a two dimensional array? An array of objects?
+    3. Set up the carousel in the home page for each category
+    4. Style the cards to make sure it looks nice
+    5. Begin working on the /posts/[slug] page to display posts 
+*/
+
 export interface SimplifiedPost {
   author: Author;
   content: string;
@@ -36,6 +45,16 @@ interface Edge {
   node: SimplifiedPost;
 }
 
+export interface CategoryIds {
+  categories: {
+    edges: {
+      node: {
+        categoryId: string;
+      };
+    };
+  };
+}
+
 export async function fetchLatestPosts(): Promise<
   SimplifiedPost[] | undefined
 > {
@@ -50,7 +69,7 @@ export async function fetchLatestPosts(): Promise<
       },
       body: JSON.stringify({
         query: `query latestPostsQuery {
-      posts(first: 3, where: { orderby: { field: DATE, order: DESC } }) {
+      posts(first: 1, where: { orderby: { field: DATE, order: DESC } }) {
             edges {
               node {
                 title
@@ -96,6 +115,38 @@ export async function fetchLatestPosts(): Promise<
     );
 
     return simplifiedPost;
+  } catch (err: unknown) {
+    console.log("Error fetching data", err);
+  }
+}
+
+// Fetch category ID
+export async function fetchCategoryIds(): Promise<CategoryIds[] | undefined> {
+  try {
+    if (!process.env.WORDPRESS_API) {
+      throw new Error("WORDPRESS_API environment variable is not defined.");
+    }
+    const response = await fetch(process.env.WORDPRESS_API, {
+      method: "POST",
+      headers: {
+        "Content-type": "application/json",
+      },
+      body: JSON.stringify({
+        query: `query AllCategoryIds {
+          categories(first: 10) {
+            edges {
+              node {
+                id
+              }
+            }
+          }
+        }`,
+      }),
+      next: { revalidate: 3600 },
+    });
+
+    const result: CategoryIds[] = await response.json();
+    return result;
   } catch (err: unknown) {
     console.log("Error fetching data", err);
   }
