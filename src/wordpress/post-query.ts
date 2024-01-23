@@ -1,7 +1,5 @@
 /*
   TO DO:
-    1. Fetch all posts within a category
-    2. Figure out the structure of the category posts. Should it be a two dimensional array? An array of objects?
     3. Set up the carousel in the home page for each category
     4. Style the cards to make sure it looks nice
     5. Begin working on the /posts/[slug] page to display posts 
@@ -9,10 +7,12 @@
 
 export interface SimplifiedPost {
   author: Author;
+  categories?: Categories;
   content: string;
   date: string;
   excerpt: string;
   featuredImage: FeaturedImage;
+  postId?: number;
   slug: string;
   title: string;
 }
@@ -36,8 +36,8 @@ export interface Author {
     avatar: {
       url: string;
     };
-    nickname: string;
     name: string;
+    nickname: string;
   };
 }
 
@@ -46,13 +46,24 @@ interface Edge {
 }
 
 export interface CategoryIds {
-  categories: {
-    edges: {
-      node: {
-        categoryId: string;
-      };
+  data: {
+    categories: {
+      edges: {
+        node: {
+          categoryId: number;
+          name: string;
+        };
+      }[];
     };
   };
+}
+
+interface Categories {
+  edges: {
+    node: {
+      name: string;
+    };
+  }[];
 }
 
 export async function fetchLatestPosts(): Promise<
@@ -121,7 +132,7 @@ export async function fetchLatestPosts(): Promise<
 }
 
 // Fetch category ID
-export async function fetchCategoryIds(): Promise<CategoryIds[] | undefined> {
+export async function fetchCategoryIds(): Promise<CategoryIds | undefined> {
   try {
     if (!process.env.WORDPRESS_API) {
       throw new Error("WORDPRESS_API environment variable is not defined.");
@@ -133,10 +144,11 @@ export async function fetchCategoryIds(): Promise<CategoryIds[] | undefined> {
       },
       body: JSON.stringify({
         query: `query AllCategoryIds {
-          categories(first: 10) {
+          categories(first: 3) {
             edges {
               node {
-                id
+                categoryId
+                name
               }
             }
           }
@@ -145,9 +157,93 @@ export async function fetchCategoryIds(): Promise<CategoryIds[] | undefined> {
       next: { revalidate: 3600 },
     });
 
-    const result: CategoryIds[] = await response.json();
+    const result: CategoryIds = await response.json();
     return result;
   } catch (err: unknown) {
     console.log("Error fetching data", err);
   }
+}
+
+export async function fetchPostsByCategory(): Promise<
+  SimplifiedPost[] | undefined
+> {
+  const categoryData: CategoryIds | undefined = await fetchCategoryIds();
+  const categoryIds = categoryData?.data?.categories.edges;
+
+  let arrayOfPosts: SimplifiedPost[] | undefined = [];
+
+  if (!categoryIds) {
+    console.log("No categoryIds available.");
+    return;
+  }
+
+  await Promise.all<Promise<void>>(
+    categoryIds?.map(async (id) => {
+      // for each of these ids, I want to make a query and save it in the same array, then return the array
+      try {
+        const categoryId = id.node.categoryId;
+
+        if (!process.env.WORDPRESS_API) {
+          throw new Error("WORDPRESS_API environment variable is not defined.");
+        }
+        const response = await fetch(process.env.WORDPRESS_API, {
+          method: "POST",
+          headers: {
+            "Content-type": "application/json",
+          },
+          body: JSON.stringify({
+            query: `query postsQuery {
+              posts(where: {categoryId: ${categoryId}, orderby: {field: DATE, order: DESC}}) {
+                edges {
+                  node {
+                    author {
+                      node {
+                        avatar {
+                          url
+                        }
+                        name
+                      }
+                    }
+                    categories {
+                      edges {
+                        node {
+                          name
+                        }
+                      }
+                    }
+                    date
+                    featuredImage {
+                      node {
+                        altText
+                        mediaDetails {
+                          sizes {
+                            height
+                            width
+                          }
+                        }
+                        sourceUrl
+                      }
+                    }
+                    excerpt
+                    postId
+                    slug
+                    title
+                  }
+                }
+              }
+            }`,
+          }),
+          next: { revalidate: 3600 },
+        });
+        const result = await response.json();
+        const simplifiedPost: SimplifiedPost[] =
+          result?.data?.posts?.edges?.map((edge: Edge) => edge?.node || []);
+
+        arrayOfPosts?.push(...simplifiedPost);
+      } catch (err: unknown) {
+        console.log("Error fetching data", err);
+      }
+    })
+  );
+  return arrayOfPosts;
 }

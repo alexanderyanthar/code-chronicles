@@ -1,64 +1,68 @@
-import { fetchCategoryIds, fetchLatestPosts } from "@/wordpress/post-query";
-import type { SimplifiedPost, CategoryIds } from "@/wordpress/post-query";
-import Image from "next/image";
-import DOMPurify from "isomorphic-dompurify";
+import { fetchLatestPosts, fetchPostsByCategory } from "@/wordpress/post-query";
+import type { SimplifiedPost } from "@/wordpress/post-query";
 import HeroPost from "@/components/hero-post";
-import { parseISO, format } from "date-fns";
 import Container from "@/components/container";
+import CategoryPostCard from "@/components/category-post-card";
+/*
+  TO DO:
+    2. Create post carousel for latest posts
+    3. style cards to look pretty
+    
+    ***After MVP(home page and individual post page) is done**
+      a. add a category path `/posts/[category]`
+      b. style category page - similar to home page but for category
+      c. add search option
+      d. add a view more option on home page to see more posts in the same category
+*/
 
 export default async function Home() {
   const result: SimplifiedPost[] | undefined = await fetchLatestPosts();
-  const heroPostData = result?.[0];
+  const heroPostData: SimplifiedPost | undefined = result?.[0];
+  const categoryPosts: SimplifiedPost[] | undefined =
+    await fetchPostsByCategory();
 
-  /*
-  TODO:
-    1. Organize the rest of data flow
-    2. DONE---Split hero post data away from rest of posts (first item in array)
-    3. split up componenets and functions individually for separation of concerns
-      - Date function
-      - Image sizing
-      - author avatar and names
-      - title
-      - excerpt and content
-    4. Pass data as props from parent to children
-      Be mindful of data flow!! - Refer to course to get the perfect mid point. - Not applicable yet, but will be soon.
-  */
+  const uniqueCategories = Array.from(
+    new Set(
+      categoryPosts?.flatMap(
+        (post) => post.categories?.edges?.map((edge) => edge.node.name) || []
+      ) || []
+    )
+  );
+
+  // Create an object to store posts for each category
+  const postsByCategory: Record<string, SimplifiedPost[]> = {};
+
+  // Initialize the object with empty arrays for each category
+  uniqueCategories.forEach((category) => {
+    postsByCategory[category] = [];
+  });
+
+  // Sort posts into their respective category arrays
+  categoryPosts?.forEach((post) => {
+    const categories =
+      post.categories?.edges?.map((edge) => edge.node.name) || [];
+    categories.forEach((category) => {
+      postsByCategory[category].push(post);
+    });
+  });
 
   return (
     <div>
       <Container>
         <HeroPost heroPostData={heroPostData} />
+        <h2 className="text-4xl bold">Categories</h2>
+        {uniqueCategories.length > 0 &&
+          uniqueCategories.map((category) => (
+            <div key={category}>
+              <h3 className="text-4xl bold">{category}</h3>
+              <div className="carousel">
+                {postsByCategory[category]?.map((post) => (
+                  <CategoryPostCard post={post} key={post.postId} />
+                ))}
+              </div>
+            </div>
+          ))}
       </Container>
-      <ul>
-        {result?.map((post) => (
-          <li key={post.title}>
-            <h2>{post.title}</h2>
-            {post.featuredImage !== null && (
-              <Image
-                src={post.featuredImage.node.sourceUrl}
-                alt={post.featuredImage.node.altText}
-                width={1280}
-                height={500}
-              />
-            )}
-            <time dateTime={post.date}>
-              {format(parseISO(post.date), "LLLL, d, yyyy")}
-            </time>
-            <Image
-              src={post.author.node.avatar.url}
-              alt=""
-              width={25}
-              height={25}
-            />
-            <p>{post.author.node.name}</p>
-            <div
-              dangerouslySetInnerHTML={{
-                __html: DOMPurify.sanitize(post.excerpt),
-              }}
-            />
-          </li>
-        ))}
-      </ul>
     </div>
   );
 }
