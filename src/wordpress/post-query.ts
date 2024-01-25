@@ -193,7 +193,7 @@ export async function fetchPostsByCategory(): Promise<
           },
           body: JSON.stringify({
             query: `query postsQuery {
-              posts(where: {categoryId: ${categoryId}, orderby: {field: DATE, order: DESC}}) {
+              posts(first: 3, where: {categoryId: ${categoryId}, orderby: {field: DATE, order: DESC}}) {
                 edges {
                   node {
                     author {
