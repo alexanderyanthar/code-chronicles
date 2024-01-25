@@ -39,7 +39,7 @@ export default async function Category() {
             <h3 className="text-4xl font-semibold mb-2">{category}</h3>
             <div className="flex justify-center">
               {postsByCategory[category]?.map((post) => (
-                <CategoryPostCard post={post} key={post.postId} />
+                <CategoryPostCard post={post} key={post.id} />
               ))}
             </div>
           </div>

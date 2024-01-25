@@ -2,7 +2,7 @@ const paths = {
   home() {
     return "/";
   },
-  postShow(postSlug: string) {
+  postShow(postSlug: string | undefined) {
     return `/posts/${postSlug}`;
   },
 };

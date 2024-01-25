@@ -1,3 +1,19 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.wp-block-code {
+  @apply rounded-3xl max-w-screen-md mx-auto flex justify-center items-center py-16 mb-8;
+}
+
+.wp-block-pullquote {
+  @apply italic text-center max-w-screen-sm mx-auto text-2xl;
+}
+
+.wp-block-pullquote p {
+  @apply text-lg mb-16;
+}
+
+.wp-block-pullquote cite {
+  @apply not-italic text-lg;
+}

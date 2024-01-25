@@ -12,7 +12,7 @@ export interface SimplifiedPost {
   date: string;
   excerpt: string;
   featuredImage: FeaturedImage;
-  postId?: number;
+  id: string;
   slug: string;
   title: string;
 }
@@ -21,11 +21,13 @@ export interface FeaturedImage {
   node: {
     id: string;
     altText: string;
-    mediaDetails: {
-      sizes: {
+    mediaDetails?: {
+      sizes?: {
         height: string;
         width: string;
       }[];
+      height: number;
+      width: number;
     };
     sourceUrl: string;
   };
@@ -111,7 +113,7 @@ export async function fetchLatestPosts(): Promise<
                 date
                 excerpt
                 slug
-                content
+                id
               }
             }
           }
@@ -120,6 +122,8 @@ export async function fetchLatestPosts(): Promise<
       next: { revalidate: 3600 },
     });
     const result = await response.json();
+
+    console.log(result);
 
     const simplifiedPost: SimplifiedPost[] = result?.data?.posts?.edges?.map(
       (edge: Edge) => edge?.node || []
@@ -225,7 +229,7 @@ export async function fetchPostsByCategory(): Promise<
                       }
                     }
                     excerpt
-                    postId
+                    id
                     slug
                     title
                   }
@@ -246,4 +250,55 @@ export async function fetchPostsByCategory(): Promise<
     })
   );
   return arrayOfPosts;
+}
+
+export async function fetchPostBySlug(
+  slug: string
+): Promise<SimplifiedPost | undefined> {
+  try {
+    if (!process.env.WORDPRESS_API) {
+      throw new Error("WORDPRESS_API environment variable is not defined.");
+    }
+    const response = await fetch(process.env.WORDPRESS_API, {
+      method: "POST",
+      headers: {
+        "Content-type": "application/json",
+      },
+      body: JSON.stringify({
+        query: `query postsQuery {
+                  post(id: "${slug}", idType: SLUG) {
+                      author {
+                        node {
+                          avatar {
+                            url
+                          }
+                          name
+                        }
+                      }
+                      content
+                      date
+                      featuredImage {
+                        node {
+                          altText
+                          mediaDetails {
+                            height
+                            width
+                          }
+                          sourceUrl
+                        }
+                      }
+                      title
+                    }
+                }`,
+      }),
+    });
+
+    const result = await response.json();
+
+    const finalResult = result.data.post;
+
+    return finalResult;
+  } catch (err: unknown) {
+    console.error("Error fetching posts", err);
+  }
 }
