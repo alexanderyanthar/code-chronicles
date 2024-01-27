@@ -12,7 +12,7 @@ export default function CoverImage({ coverImage }: CoverImageProps) {
       alt={coverImage.node.altText}
       width={parseInt(coverImage.node.mediaDetails.sizes[3].width)}
       height={parseInt(coverImage.node.mediaDetails.sizes[3].height)}
-      className="rounded-l-md"
+      className="rounded-l-2xl"
     />
   );
 }

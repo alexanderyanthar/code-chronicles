@@ -21,8 +21,8 @@ export interface FeaturedImage {
   node: {
     id: string;
     altText: string;
-    mediaDetails?: {
-      sizes?: {
+    mediaDetails: {
+      sizes: {
         height: string;
         width: string;
       }[];
@@ -96,6 +96,8 @@ export async function fetchLatestPosts(): Promise<
                         height
                         width
                       }
+                      height
+                      width
                     }
                   }
                 }
@@ -224,6 +226,8 @@ export async function fetchPostsByCategory(): Promise<
                             height
                             width
                           }
+                          height
+                          width
                         }
                         sourceUrl
                       }

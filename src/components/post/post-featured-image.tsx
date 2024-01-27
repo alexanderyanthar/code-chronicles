@@ -14,7 +14,7 @@ export default function PostFeaturedImage({
       alt={featuredImage.node.altText}
       width={featuredImage.node.mediaDetails?.width}
       height={featuredImage.node.mediaDetails?.height}
-      className="max-w-screen-xl mt-8 mx-auto"
+      className="mt-8 mx-auto"
     />
   );
 }

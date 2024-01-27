@@ -17,13 +17,15 @@ import Header from "@/components/header/header";
 export default async function Home() {
   return (
     <main>
-      <Container>
+      <Container size="2xl">
         <section>
           <Header />
           <HeroPost />
         </section>
+      </Container>
+      <Container size="xl">
         <section>
-          <h2 className="text-6xl font-bold mt-8 mb-4">Categories</h2>
+          <h2 className="text-6xl font-bold mt-8">Categories</h2>
           <Category />
         </section>
       </Container>

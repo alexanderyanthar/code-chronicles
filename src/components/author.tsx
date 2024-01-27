@@ -3,18 +3,27 @@ import type { Author } from "@/wordpress/post-query";
 
 interface AuthorProps {
   author: Author;
+  width: number;
+  height: number;
+  textSize?: string;
 }
 
-export default function Author({ author }: AuthorProps) {
+export default function Author({
+  author,
+  width,
+  height,
+  textSize = "lg",
+}: AuthorProps) {
   return (
-    <div className="flex">
+    <div className="flex items-center">
       <Image
         src={author.node.avatar.url}
         alt={`${author.node.name} avatar`}
-        width={25}
-        height={25}
+        width={width}
+        height={height}
+        className="avatar mask mask-squircle"
       />
-      <p className="ml-2">{author.node.name}</p>
+      <p className={`ml-2 text-${textSize}`}>{author.node.name}</p>
     </div>
   );
 }

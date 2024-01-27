@@ -36,8 +36,8 @@ export default async function Category() {
       {uniqueCategories.length > 0 &&
         uniqueCategories.map((category) => (
           <div key={category}>
-            <h3 className="text-4xl font-semibold mb-2">{category}</h3>
-            <div className="flex justify-center">
+            <h3 className="text-4xl font-semibold my-8">{category}</h3>
+            <div className="flex justify-center mb-10">
               {postsByCategory[category]?.map((post) => (
                 <CategoryPostCard post={post} key={post.id} />
               ))}

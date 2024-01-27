@@ -25,16 +25,23 @@ export default async function HeroPost() {
             <CoverImage coverImage={heroPostData.featuredImage} />
           )}
           <div className="card-body mx-auto justify-center">
-            <h2 className="card-title text-4xl">{heroPostData.title}</h2>
+            <h2 className="card-title text-6xl">{heroPostData.title}</h2>
             <div className="mt-8">
-              <Date dateString={heroPostData.date} />
               <div
-                className=""
+                className="mb-2 text-xl"
                 dangerouslySetInnerHTML={{
                   __html: DOMPurify.sanitize(heroPostData.excerpt),
                 }}
               />
-              <Author author={heroPostData.author} />
+              <div className="mb-4">
+                <Date dateString={heroPostData.date} />
+              </div>
+              <Author
+                author={heroPostData.author}
+                width={50}
+                height={50}
+                textSize="xl"
+              />
             </div>
           </div>
         </div>

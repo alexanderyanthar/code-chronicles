@@ -14,7 +14,6 @@
 */
 
 import { SimplifiedPost } from "@/wordpress/post-query";
-import Image from "next/image";
 import Date from "../date";
 import Author from "../author";
 import DOMPurify from "isomorphic-dompurify";
@@ -43,7 +42,7 @@ export default function CategoryPostCard({ post }: PostProps) {
           }}
         />
         <Date dateString={post.date} />
-        <Author author={post.author} />
+        <Author author={post.author} width={25} height={25} />
       </div>
     </Link>
   );

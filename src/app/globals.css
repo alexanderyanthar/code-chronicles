@@ -2,12 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
+.blog-content p {
+  @apply text-xl pt-4;
+}
+
 .wp-block-code {
-  @apply rounded-3xl max-w-screen-md mx-auto flex justify-center items-center py-16 mb-8;
+  @apply bg-neutral text-neutral-content rounded-3xl flex justify-center items-center mx-auto py-10 my-8;
 }
 
 .wp-block-pullquote {
-  @apply italic text-center max-w-screen-sm mx-auto text-2xl;
+  @apply italic text-center mx-auto text-2xl;
 }
 
 .wp-block-pullquote p {
