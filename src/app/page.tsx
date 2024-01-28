@@ -25,7 +25,7 @@ export default async function Home() {
       </Container>
       <Container size="xl">
         <section>
-          <h2 className="text-6xl font-bold mt-8">Categories</h2>
+          <h2 className="text-6xl font-bold my-8">Categories</h2>
           <Category />
         </section>
       </Container>

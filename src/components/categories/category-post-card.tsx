@@ -23,13 +23,14 @@ import FeaturedImage from "./featured-image";
 
 interface PostProps {
   post: SimplifiedPost;
+  width?: string;
 }
 
-export default function CategoryPostCard({ post }: PostProps) {
+export default function CategoryPostCard({ post, width = "1/3" }: PostProps) {
   return (
     <Link
       href={paths.postShow(post.slug)}
-      className="card w-1/3 bg-base-200 shadow-xl mr-8 transition-shadow duration-300 hover:shadow-2xl"
+      className={`card w-${width} bg-base-200 shadow-xl mr-8 transition-shadow duration-300 hover:shadow-2xl`}
     >
       {post.featuredImage !== null && (
         <FeaturedImage featuredImage={post.featuredImage} />

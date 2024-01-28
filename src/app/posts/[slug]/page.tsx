@@ -14,10 +14,8 @@ interface PostSlugProps {
 /*
   To Do:
     1. Finish styling blog page
-      a. Stlye paragrapghs
       b. images
       c. title
-      d. code components
       e. quotes
       f. media/text
 */

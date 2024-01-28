@@ -64,8 +64,17 @@ interface Categories {
   edges: {
     node: {
       name: string;
+      slug: string;
     };
   }[];
+}
+
+interface CategoryId {
+  data: {
+    category: {
+      categoryId: number;
+    };
+  };
 }
 
 export async function fetchLatestPosts(): Promise<
@@ -125,8 +134,6 @@ export async function fetchLatestPosts(): Promise<
     });
     const result = await response.json();
 
-    console.log(result);
-
     const simplifiedPost: SimplifiedPost[] = result?.data?.posts?.edges?.map(
       (edge: Edge) => edge?.node || []
     );
@@ -150,7 +157,7 @@ export async function fetchCategoryIds(): Promise<CategoryIds | undefined> {
       },
       body: JSON.stringify({
         query: `query AllCategoryIds {
-          categories(first: 3) {
+          categories(first: 4) {
             edges {
               node {
                 categoryId
@@ -214,6 +221,7 @@ export async function fetchPostsByCategory(): Promise<
                       edges {
                         node {
                           name
+                          slug
                         }
                       }
                     }
@@ -295,6 +303,7 @@ export async function fetchPostBySlug(
                     }
                 }`,
       }),
+      next: { revalidate: 3600 },
     });
 
     const result = await response.json();
@@ -302,6 +311,103 @@ export async function fetchPostBySlug(
     const finalResult = result.data.post;
 
     return finalResult;
+  } catch (err: unknown) {
+    console.error("Error fetching posts", err);
+  }
+}
+
+export async function fetchCategoryId(
+  categorySlug: string
+): Promise<CategoryId | undefined> {
+  try {
+    if (!process.env.WORDPRESS_API) {
+      throw new Error("WORDPRESS_API environment variable is not defined.");
+    }
+    const response = await fetch(process.env.WORDPRESS_API, {
+      method: "POST",
+      headers: {
+        "Content-type": "application/json",
+      },
+      body: JSON.stringify({
+        query: `query fetchCategoryId {
+          category(id: "${categorySlug}", idType: SLUG) {
+              categoryId
+              }
+            }`,
+      }),
+      next: { revalidate: 3600 },
+    });
+    const result: CategoryId | undefined = await response.json();
+    return result;
+  } catch (err: unknown) {
+    console.error("Error fetching category id", err);
+  }
+}
+
+export async function fetchAllPostsByCategoryId(
+  categorySlug: string
+): Promise<SimplifiedPost[] | undefined> {
+  try {
+    const categoryIdResult = await fetchCategoryId(categorySlug);
+    const categoryId = categoryIdResult?.data.category.categoryId;
+
+    if (!process.env.WORDPRESS_API) {
+      throw new Error("WORDPRESS_API environment variable is not defined.");
+    }
+    const response = await fetch(process.env.WORDPRESS_API, {
+      method: "POST",
+      headers: {
+        "Content-type": "application/json",
+      },
+      body: JSON.stringify({
+        query: `query fetchAllPostsByCategory {
+          posts(where: {categoryId: ${categoryId}, orderby: {field: DATE, order: DESC}}) {
+            edges {
+              node {
+                author {
+                  node {
+                    avatar {
+                      url
+                    }
+                    name
+                  }
+                }
+                categories {
+                  edges {
+                    node {
+                      name
+                    }
+                  }
+                }
+                date
+                excerpt
+                id
+                featuredImage {
+                  node {
+                    altText
+                    mediaDetails {
+                      height
+                      width
+                    }
+                    sourceUrl
+                  }
+                }
+                slug
+                title
+              }
+            }
+          }
+        }`,
+      }),
+      next: { revalidate: 3600 },
+    });
+    const result = await response.json();
+
+    const simplifiedPost: SimplifiedPost[] = result?.data?.posts?.edges?.map(
+      (edge: Edge) => edge?.node || []
+    );
+
+    return simplifiedPost;
   } catch (err: unknown) {
     console.error("Error fetching posts", err);
   }
